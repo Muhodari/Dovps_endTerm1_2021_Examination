@@ -15,8 +15,8 @@ import rw.ac.rca.termOneExam.repository.ICityRepository;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static jdk.jfr.internal.jfc.model.Constraint.any;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -63,21 +63,27 @@ public class CityServiceTest {
 
     }
 
+
     @Test
-
-    public  void  addNew(){
-        CreateCityDTO dto = new CreateCityDTO("Musanze",4545);
-        when(iCityRepositoryMock.existsByName(dto.getId())).thenReturn(false);
-        when(iCityRepositoryMock.existsByName(dto.getName())).thenReturn(false);
-        City city = new City();
-        city.setName(dto.getName());
-        city.setWeather(dto.getWeather());
-
-        when(iCityRepositoryMock.save(city)).thenReturn(city);
-        City newCity = cityService.save( dto);
-        assertTrue(newCity.getStatusCodeValue()==201);
-
+    public void AddNewCity_Success(){
+        when(cityService.save(any(City.class))).
+                thenReturn(new City(102,"Musanze",18,75.2));
+        City city = cityService.save(new CreateCityDTO("Musanze",24.0));
+        assertEquals("Musanze",city.getName());
+        assertEquals(102,city.getId());
     }
+
+
+
+    @Test
+    public void AddNewCity_Fail(){
+        when(iCityRepositoryMock.save(any(City.class))).thenReturn(null);
+        City city = cityService.save(new CreateCityDTO("Musanze",18));
+        assertNull(city);
+    }
+
+
+
 
 
 }
