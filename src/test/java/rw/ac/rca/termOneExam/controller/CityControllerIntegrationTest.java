@@ -15,11 +15,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import rw.ac.rca.termOneExam.domain.City;
+import rw.ac.rca.termOneExam.dto.CreateCityDTO;
 import rw.ac.rca.termOneExam.service.CityService;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static jdk.jfr.internal.jfc.model.Constraint.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -38,8 +41,8 @@ public class CityControllerIntegrationTest {
     @Test
     public void getAll_success() throws Exception {
         List<City> cities= Arrays.asList(
-                new City(1,"Kigali",2,2),
-                new City(12,"Musanze",4,4)
+                new City(103,"Kigali",24,2),
+                new City(101,"Musanze",4,4)
         );
         when(cityServiceMock.getAll()).thenReturn(cities);
 
@@ -51,60 +54,71 @@ public class CityControllerIntegrationTest {
                 .perform(request)
                 .andExpect(status().isOk())
                 .andExpect(content()
-                        .json("[{\"id\":1,\"name\":\"Kigali\",\"weather\":2,\"fehrenheit\":2}," +
-                                "{\"id\":12,\"name\":\"Musanze\",\"weather\":4,\"fehrenheit\":4}]"))
+                        .json("[{\"id\":103,\"name\":\"Kigali\",\"weather\":24,\"fehrenheit\":2}," +
+                                "{\"id\":101,\"name\":\"Rubavu\",\"weather\":20,\"fehrenheit\":4}]"))
                 .andReturn();
     }
+
 
 
 
     public void getByid_success() throws Exception {
-        City city = new City(1,"Musanze",1,10);
 
-        when(cityServiceMock.getById(city.getId())).thenReturn(city);
-
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .get("/api/cities/id/{id}/1")
-                .accept(MediaType.APPLICATION_JSON);
-
-        MvcResult result = mockMvc
-                .perform(request)
+        Optional<City> city = Optional.of(new City(102, "Musanze", 18, 0.0));
+        when(cityServiceMock.getById(101)).thenReturn(city);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/api/cities/id/101");
+        mockMvc.perform(requestBuilder)
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\":1,\"name\":\"Musanze\",\"weather\":1,\"fehrenheit\":10}}"))
-                .andReturn();
+                .andExpect(content().json("{\"id\":102,\"name\":\"Musanze\",\"weather\":18,\"fahrenheit\":0}"));
     }
 
 
 
-
-
     public void getByOne_404() throws Exception {
-        City city = new City(1,"Musanze",1,10);
+        City city = new City(102,"Musanze",18,0);
 
-        when(cityServiceMock.getById(city.getId())).thenReturn(city);
-
+        when(cityServiceMock.getById(city.getId())).thenReturn(Optional.empty());
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .get("/api/cities/id/{id}/2")
+                .get("/api/cities/id/102")
                 .accept(MediaType.APPLICATION_JSON);
 
         MvcResult result = mockMvc
                 .perform(request)
                 .andExpect(status().isNotFound())
-                .andExpect(content().json("{\"status\":false,\"message\":\"Item not found\"}"))
+                .andExpect(content().json("{\"status\":false,\"message\":\"City not found in our database \"}"))
                 .andReturn();
     }
 
 
 
     @Test
-    void POSTwhenValidInput_thenReturns200() throws Exception {
-       City city = new City("kigali", 2);
+    public void addNewCity_fail() throws Exception {
+        when(cityServiceMock.existsByName("Gisagara")).thenReturn(true);
 
-        mockMvc.perform(post("/api/cities/add", 42L)
-                        .contentType("application/json")
-                        .param("sendWelcomeMail", "true")
-                        .content(objectMapper.writeValueAsString(city)))
-                .andExpect(status().isOk());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/api/cities/add")
+                .content("{\"name\":\"Gisagara\",\"weather\":26}")
+                .contentType("application/json");
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json("{\"status\":false,\"message\":\"city already exits !!!!!  \"}"));
+    }
+
+
+
+
+
+    @Test
+    public void AddNewCity_success() throws Exception {
+        when(cityServiceMock.save(any(CreateCityDTO.class))).thenReturn(new City(103, "GISAGARA", 30, 0));
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/api/cities/add")
+                .content("{\"name\":\"GISAGARA\",\"weather\":30}")
+                .contentType("application/json");
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isCreated())
+                .andExpect(content().json("{\"id\":103,\"name\":\"GISAGARA\",\"weather\":30,\"fahrenheit\":0}"));
     }
 
 

@@ -64,7 +64,6 @@ public class CityServiceTest {
         when(iCityRepositoryMock.existsByName(dto.getId())).thenReturn(false);
         when(iCityRepositoryMock.existsByName(dto.getName())).thenReturn(false);
         City city = new City();
-        city.setId(dto.getId());
         city.setName(dto.getName());
         city.setWeather(dto.getWeather());
 
