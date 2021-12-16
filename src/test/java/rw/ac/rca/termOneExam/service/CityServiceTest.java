@@ -31,18 +31,24 @@ public class CityServiceTest {
     @Test
     public void getAll_success() {
         when(iCityRepositoryMock.findAll()).thenReturn(Arrays.asList(
-                new City(1,"kigali",34.5,5),
-                new City(2,"Musanze",56,23)
+                new City(102,"kigali",34.5,5),
+                new City(104,"Musanze",56,23)
         ));
         assertEquals(1,cityService.getAll().get(0).getId());
+    }
+
+    @Test
+    public void getAll_fail() {
+        when(iCityRepositoryMock.findAll()).thenReturn(Arrays.asList());
+        assertEquals(0,cityService.getAll().size());
     }
 
 
     @Test
     public  void getById_success(){
-        City city = new City(1L,"Kigali",54,5);
-        when(iCityRepositoryMock.findById(1L)).thenReturn(Optional.of(city));
-        assertEquals(1L,cityService.getAll().get(0).getId());
+        City city = new City(103,"Kigali",54,5);
+        when(iCityRepositoryMock.findById(103)).thenReturn(Optional.of(city));
+        assertEquals(103,cityService.getAll().get(0).getId());
         assertEquals("kigali",cityService.getAll().get(0).getName());
 
     }
