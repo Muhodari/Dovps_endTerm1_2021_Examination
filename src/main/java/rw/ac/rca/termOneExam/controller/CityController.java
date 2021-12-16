@@ -28,7 +28,7 @@ public class CityController {
 	@GetMapping("/id/{id}")
 	public ResponseEntity<?> getById(@PathVariable(name = "id") long id) {
 
-		Optional<City> city = cityService.getById(id);
+		Optional<City> city = Optional.ofNullable(cityService.getById(id));
 
 		if (city.isPresent()) {
 			return ResponseEntity.status(HttpStatus.OK).body(city.get());
