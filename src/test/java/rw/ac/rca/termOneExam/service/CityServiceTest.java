@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import rw.ac.rca.termOneExam.domain.City;
+import rw.ac.rca.termOneExam.dto.CreateCityDTO;
 import rw.ac.rca.termOneExam.dto.UpdateCityDTO;
 import rw.ac.rca.termOneExam.repository.ICityRepository;
 
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -37,8 +39,7 @@ public class CityServiceTest {
 
 
     @Test
-    public  void getById(){
-        UpdateCityDTO dto= new UpdateCityDTO("kigali",3);
+    public  void getById_success(){
         City city = new City(1L,"Kigali",54,5);
         when(iCityRepositoryMock.findById(1L)).thenReturn(Optional.of(city));
         assertEquals(1L,cityService.getAll().get(0).getId());
@@ -48,8 +49,30 @@ public class CityServiceTest {
 
 
 
+    @Test
+    public void  getById_NotFound() {
+        City city = new City(1L, "Kigali", 54, 5);
+        when(iCityRepositoryMock.findById(1L)).thenReturn(Optional.of(false));
+        assertTrue(iCityRepositoryMock.existsByName("kigali")==false);
 
+    }
 
+    @Test
+
+    public  void  addNew(){
+        CreateCityDTO dto = new CreateCityDTO("Musanze",4545);
+        when(iCityRepositoryMock.existsByName(dto.getId())).thenReturn(false);
+        when(iCityRepositoryMock.existsByName(dto.getName())).thenReturn(false);
+        City city = new City();
+        city.setId(dto.getId());
+        city.setName(dto.getName());
+        city.setWeather(dto.getWeather());
+
+        when(iCityRepositoryMock.save(city)).thenReturn(city);
+        City newCity = cityService.save( dto);
+        assertTrue(newCity.getStatusCodeValue()==201);
+
+    }
 
 
 }

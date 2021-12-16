@@ -70,5 +70,8 @@ public class City {
 	public void setFahrenheit(double fahrenheit) {
 		this.fahrenheit = fahrenheit;
 	}
-	
+
+	public int getStatusCodeValue() {
+		return 0;
+	}
 }

@@ -39,13 +39,7 @@ public class CityService {
 
 
 	public boolean existsByName(String name) {
-		List<City> cities = cityRepository.findAll();
-		if(findById==true){
-			City city= findById.get();
-			city.setFahrenheit( (city.getWeather()* 9/5)+32);
-			return city;
-		}
-		return null;
+		return cityRepository.existsByName(name);
 	}
 
 
